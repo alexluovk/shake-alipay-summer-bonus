@@ -14,6 +14,7 @@ function start() {
 
   var startBtn = className("android.widget.Image").text("摇红包")
   var closeBtn = className("android.widget.Button").text("关闭")
+  var gotLabel = className("android.view.View").text("再摇一个")
   var successLabel = className("android.view.View").text("恭喜摇到高温补贴")
   var endLabel = className("android.view.View").text("领取太多红包了")
   var dualAccountLabel = className("android.view.View").text("你们已有账号摇过了")
@@ -21,11 +22,13 @@ function start() {
   tMsg('等待"摇红包"按钮出现')
   AwaitFor(function () {
     return startBtn.exists();
-  }, 1000, 300)
+  }, 2000, 300)
 
   if (!startBtn.exists()) {
     tMsg('尝试关闭弹窗')
-    closeBtn.click()
+    if (closeBtn.exists()) {
+      closeBtn.click()
+    }
 
     tMsg('再次等待"摇红包"按钮出现')
     AwaitFor(function () {
@@ -59,13 +62,38 @@ function start() {
       className("android.widget.Button").findOne().click();
       sleep(randNum(500, 1000));
 
-      // todo: 今天摇完次数了，明天再写摇满两个打开红包
+      AwaitFor(function () {
+        // 若出现“再摇一个”，则点击
+        return gotLabel.exists()
+      }, 5000, 300)
+      gotLabel.findOne().click();
+
+      // === 摇满两个打开红包 ===
+      var btn2Fans = className("android.widget.Image").text("A*b0veTIhf4WgAAAAAAAAAAAAAARQnAQ")
+
+      AwaitFor(function () {
+        // 若出现“摇满两个”，则点击
+        return btn2Fans.exists()
+      }, 5000, 300)
+      btn2Fans.findOne().click();
+
+      AwaitFor(function () {
+        return className("android.view.View").text("恭喜获得红包").exists();
+      }, 5000, 300)
+      className("android.widget.Button").findOne().click();
+
+      AwaitFor(function () {
+        // 若出现“再摇一个”，则点击
+        return gotLabel.exists()
+      }, 5000, 300)
+      gotLabel.findOne().click();
+
     } else {
       // 如果失败
       closeBtn.waitFor();
 
       if (endLabel.exists() || dualAccountLabel.exists()) {
-        tMsg('今日摇红包次数已用完，明天再来')
+        tMsg('今日摇红包次数已用完，明天再来', true)
         break;
       } else {
         sleep(randNum(500, 1000));
