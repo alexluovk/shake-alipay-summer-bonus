@@ -1,5 +1,6 @@
 auto();
 console.show()
+
 start();
 function start() {
 
@@ -17,25 +18,34 @@ function start() {
   var endLabel = className("android.view.View").text("领取太多红包了")
   var dualAccountLabel = className("android.view.View").text("你们已有账号摇过了")
 
-  ABwaitFor(function () {
-    tMsg('等待"摇红包"按钮出现')
-    return startBtn.exists()
+  tMsg('等待"摇红包"按钮出现')
+  AwaitFor(function () {
+    return startBtn.exists();
   }, 1000, 300)
 
-  tMsg('尝试关闭弹窗')
-  closeBtn.click()
+  if (!startBtn.exists()) {
+    tMsg('尝试关闭弹窗')
+    closeBtn.click()
 
-  ABwaitFor(function () {
     tMsg('再次等待"摇红包"按钮出现')
-    return startBtn.exists()
-  }, 5000, 300)
+    AwaitFor(function () {
+      return startBtn.exists()
+    }, 10000, 300)
 
+    if (!startBtn.exists()) {
+      tMsg('无法找到”摇红包“按钮，程序退出')
+      consoleExit()
+    }
+  }
+
+  tMsg('@@ 开始摇红包')
   for (var i = 0; i < 1000; i++) {
-    sleep(randNum(500, 1000));
-
     var isSuccess = false;
 
-    ABwaitFor(function () {
+    sleep(randNum(500, 1000));
+    className("android.widget.Image").text("摇红包").findOne().click()
+
+    AwaitFor(function () {
       // 若出现成功标语则成功
       isSuccess = successLabel.exists()
 
@@ -43,12 +53,13 @@ function start() {
       return closeBtn.exists() || isSuccess
     }, 5000, 300)
 
-    className("android.widget.Image").text("摇红包").findOne().click()
 
     if (isSuccess) {
       // 如果成功
       className("android.widget.Button").findOne().click();
       sleep(randNum(500, 1000));
+
+      // todo: 今天摇完次数了，明天再写摇满两个打开红包
     } else {
       // 如果失败
       closeBtn.waitFor();
@@ -63,12 +74,21 @@ function start() {
     }
   }
 
-  tMsg('程序5秒后退出');
+  consoleExit()
+}
 
+/**
+ * @description 关闭console并退出
+ * @returns {void}
+ */
+function consoleExit(time) {
+  time = time || 5000;
+
+  tMsg('程序5秒后退出');
   setTimeout(() => {
     console.hide();
     exit();
-  }, 5000)
+  }, time)
 }
 
 /**
@@ -88,7 +108,7 @@ function randNum(minNum, maxNum) {
  * @param {Number} period 
  * @returns {void}
  */
-function ABwaitFor(isTrueFunc, timeout, period) {
+function AwaitFor(isTrueFunc, timeout, period) {
   if (typeof isTrueFunc !== 'function') {
     return tMsg('isTrueFunc需要是一个返回true/false的函数');
   }
@@ -96,7 +116,8 @@ function ABwaitFor(isTrueFunc, timeout, period) {
   period = period || 200;
   var time = new Date().getTime();
 
-  while (isTrueFunc()) {
+  // 当程序不为真
+  while (!isTrueFunc()) {
     if (timeout && new Date().getTime() - time >= timeout) {
       return false;
     };
