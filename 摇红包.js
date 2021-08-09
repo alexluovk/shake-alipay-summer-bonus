@@ -71,17 +71,6 @@ function corConfig() {
         }
       },
 
-      /**"摇红包"按钮 */
-      {
-        name: '"摇红包"按钮',
-        if: function () {
-          return className("android.widget.Image").text("摇红包").exists()
-        },
-        run: function () {
-          className("android.widget.Image").text("摇红包").findOne().click();
-        }
-      },
-
       /**"关闭 X "按钮 */
       {
         name: '"关闭 - X -"按钮',
@@ -90,6 +79,17 @@ function corConfig() {
         },
         run: function () {
           className("android.widget.Button").text("关闭").findOne().click();
+        }
+      },
+
+      /**"摇红包"按钮 */
+      {
+        name: '"摇红包"按钮',
+        if: function () {
+          return className("android.widget.Image").text("摇红包").exists()
+        },
+        run: function () {
+          className("android.widget.Image").text("摇红包").findOne().click();
         }
       },
 
