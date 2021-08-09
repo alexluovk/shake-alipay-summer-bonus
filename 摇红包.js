@@ -47,17 +47,6 @@ function corConfig() {
         }
       },
 
-      /**"摇红包"按钮 */
-      {
-        name: '"摇红包"按钮',
-        if: function () {
-          return className("android.widget.Image").text("摇红包").exists()
-        },
-        run: function () {
-          className("android.widget.Image").text("摇红包").findOne().click();
-        }
-      },
-
       /**"恭喜摇到高温补贴"标签 */
       {
         name: '"恭喜摇到高温补贴"标签',
@@ -67,6 +56,29 @@ function corConfig() {
         run: function () {
           // 按钮无法定位，希望它是你永远的唯一
           className("android.widget.Button").findOne().click();
+        }
+      },
+
+      /**"恭喜获得红包"标签 */
+      {
+        name: '"恭喜获得红包"标签',
+        if: function () {
+          return className("android.view.View").text("恭喜获得红包").exists()
+        },
+        run: function () {
+          // 按钮无法定位，希望它是你永远的唯一
+          className("android.widget.Button").findOne().click();
+        }
+      },
+
+      /**"摇红包"按钮 */
+      {
+        name: '"摇红包"按钮',
+        if: function () {
+          return className("android.widget.Image").text("摇红包").exists()
+        },
+        run: function () {
+          className("android.widget.Image").text("摇红包").findOne().click();
         }
       },
 
@@ -146,7 +158,7 @@ function autoJsInCOR(config) {
 
     while (isLoop()) {
       // 加入此解决curRun()阻塞问题
-      sleep(vm.randNum(500, 1000));
+      sleep(vm.randNum(1000, 1500));
 
       var curRun;
 
@@ -157,7 +169,8 @@ function autoJsInCOR(config) {
 
       if (typeof curRun === 'function') {
         // 模拟人类反应，等待触控延迟
-        sleep(vm.randNum(500, 1000));
+        sleep(vm.randNum(200, 500));
+        // sleep(vm.randNum(500, 1000));
 
         try {
           curRun()
@@ -204,7 +217,7 @@ function autoJsInCOR(config) {
    */
   this.runActionEndIf = function () {
     // 需要等待可能的触控延迟
-    sleep(500);
+    sleep(1500);
 
     var endIfArr = this.getCfg("actionEndIf")
 
