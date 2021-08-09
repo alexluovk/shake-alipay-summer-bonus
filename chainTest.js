@@ -35,9 +35,9 @@ function corConfig() {
         }
       },
 
-      /**“摇满两个”按钮 */
+      /**“摇满两个人”按钮 */
       {
-        name: '“摇满两个”按钮',
+        name: '“摇满两条人”按钮',
         if: function () {
           return className("android.widget.Image").text("A*b0veTIhf4WgAAAAAAAAAAAAAARQnAQ").exists()
         },
@@ -78,14 +78,22 @@ function corConfig() {
           className("android.widget.Button").text("关闭").findOne().click();
         }
       },
+
+
+      /**网络问题，"重试"按钮 */
     ],
     /** 退出循环条件 */
-    actionEndIf: function () {
-      var isEnd = className("android.view.View").text("领取太多红包了").exists()
-      var isDualAccount = className("android.view.View").text("你们已有账号摇过了").exists()
-
-      return isEnd || isDualAccount;
-    }
+    actionEndIf: [{
+      name: '领取太多红包了',
+      if: function () {
+        return className("android.view.View").text("领取太多红包了").exists();
+      }
+    }, {
+      name: '在另一个账号摇过了，不能双账号',
+      if: function () {
+        return className("android.view.View").text("你们已有账号摇过了").exists()
+      }
+    }]
   }
   /**
    * end ======== 更改此配置，适配所有项目 ======== 
@@ -126,7 +134,7 @@ function autoJsInCOR(config) {
       // 是否强制停止循环
       if (isForceEnd) return false;
 
-      var runRes = vm.getRun('actionEndIf');
+      var runRes = vm.runActionEndIf();
       // 若执行报错，不停止循环执行
       return runRes === "error: getRun" ? true : !runRes
     }
@@ -135,6 +143,9 @@ function autoJsInCOR(config) {
     var actionLoop = this.getActionLoop()
 
     while (isLoop()) {
+      // 加入此解决curRun()阻塞问题
+      sleep(vm.randNum(500, 1500));
+
       var curRun;
 
       vm.awaitFor(function () {
@@ -142,28 +153,25 @@ function autoJsInCOR(config) {
         return !!curRun;
       }, 10000, 300)
 
-      console.log(curRun.toString())
+      // console.log(curRun.toString())
 
       if (typeof curRun === 'function') {
         // 模拟人类反应
-        sleep(vm.randNum(500, 1500));
+        sleep(vm.randNum(500, 1000));
 
-        console.log("@@ - curRun -")
 
         // todo: 不知为何会阻塞，跑不下去
         try {
           curRun()
         } catch (error) {
-          console.log(error.toString())
+          console.log(error)
         }
-
-        console.log("@@ - curRun - End -")
       } else {
         console.log(typeof curRun)
       }
     }
 
-    this.tMsg('满足退出条件，程序退出')
+    // this.tMsg('满足退出条件，程序退出')
     this.consoleExit()
   }
 
@@ -180,21 +188,61 @@ function autoJsInCOR(config) {
       } catch (e) {
         console.log(e)
       }
-      // 看看遍历状态
 
+      // 看看遍历状态
       var name = cur['name'] || (i + 1)
-      console.log((i + 1) + '.' + name + ': ' + isExists)
+      // console.log((i + 1) + '.' + name + ': ' + isExists)
       if (isExists) {
         this.tMsg('符合' + name + '条件')
         return cur['run'];
       }
-      // else if (i === keys.length - 1) {
-      //   // 若是最后一个
-      //   return false;
-      // }
     }
 
     return false;
+  }
+
+  /**
+   * @returns {Boolean}
+   */
+  this.runActionEndIf = function () {
+    var endIfArr = this.getCfg("actionEndIf")
+
+    var notVaild = 'function' !== typeof this.get(endIfArr, '0.if')
+    if (notVaild) {
+      this.tMsg('请填写正确的 actionEndIf 参数，否则难以退出')
+      this.tMsg('程序5秒后退出')
+      this.consoleExit()
+      return true;
+    }
+
+    var vm = this;
+
+    var isEnd = false;
+    endIfArr.forEach(function (item, i) {
+      var curName = vm.get(item, 'name') || ""
+      var curRun = vm.get(item, 'if')
+
+      var msgLabel = curName || ('第' + (i + 1))
+
+      if (typeof curRun === 'function') {
+        try {
+          var runRes = curRun()
+          if (!!runRes) {
+            isEnd = true
+
+            vm.tMsg('=== end ===')
+            vm.tMsg('符合' + msgLabel + '条件')
+            vm.tMsg('=== 🏃 程序退出 🏃 ===')
+          }
+        } catch (error) {
+          vm.tMsg(error)
+        }
+      }else{
+        vm.tMsg(msgLabel + '：退出条件格式不正确，将忽略此条件')
+      }
+    })
+
+    return isEnd
   }
 
   /**
