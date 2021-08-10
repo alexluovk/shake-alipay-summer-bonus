@@ -24,6 +24,17 @@ function corConfig() {
     },
     /** 循环执行任务，优先级从上到下  */
     actionLoop: [
+      /** 正在加载中，操作置空  */
+      {
+        name: '“加载中”标签',
+        if: function () {
+          return id("h5_loading_message").exists()
+          // return className("android.widget.TextView").text("正在匹配中").exists()
+        },
+        run: function () {
+        }
+      },
+
       /** “今天已消费一次”按钮  */
       {
         name: '“今天已消费一次”按钮',
@@ -86,7 +97,7 @@ function corConfig() {
       {
         name: '"摇红包"按钮',
         if: function () {
-          return className("android.widget.Image").text("摇红包").exists()
+          return className("android.widget.Image").text("摇红包").exists() && className("android.view.View").text("(24点前使用)").exists()
         },
         run: function () {
           className("android.widget.Image").text("摇红包").findOne().click();
@@ -158,7 +169,7 @@ function autoJsInCOR(config) {
 
     while (isLoop()) {
       // 加入此解决curRun()阻塞问题
-      sleep(vm.randNum(1000, 1500));
+      sleep(vm.randNum(500, 1000));
 
       var curRun;
 
