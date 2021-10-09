@@ -15,7 +15,7 @@ function corConfig() {
   return {
     /** 基本信息  */
     app: {
-      name: "摇红包",
+      name: "摇金币换红包",
       scheme: "alipays://platformapi/startapp?appId=68687998",
       activity: "com.alipay.mobile.nebulax.integration.mpaas.activity.NebulaActivity$Main"
     },
@@ -29,7 +29,6 @@ function corConfig() {
         name: '“加载中”标签',
         if: function () {
           return id("h5_loading_message").exists()
-          // return className("android.widget.TextView").text("正在匹配中").exists()
         },
         run: function () {
         }
@@ -42,7 +41,7 @@ function corConfig() {
           return className("android.view.View").text("金币攒满啦，点右边去兑换").exists()
         },
         run: function () {
-          console.log('请手动点击兑换')
+          console.log('请手动点击"兑换"')
         }
       },
 
